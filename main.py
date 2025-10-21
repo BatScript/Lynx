@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from langchain_ollama import ChatOllama
 from embedding import vectordb
 from langchain.agents import create_agent
+from langchain.messages import AIMessage
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from ingestion import parse_file_by_type
 
@@ -89,7 +90,7 @@ def main():
     load_dotenv()
     print("[start] building/loading vectorstore...")
     try:
-        vectordb = build_or_load_vectorstore(INPUT_DIR, VECTORDB_DIR)
+        vectordb = build_or_load_vectorstore(INPUT_DIR)
     except Exception as e:
         print("Vectorstore init failed:", e)
         return
@@ -128,7 +129,11 @@ def main():
             }
        })
         
-        agent_response["messages"][-1].pretty_print()
+        op = agent_response["messages"]
+        
+        ai_messages = [m for m in op if isinstance(m, AIMessage)]
+        ai_texts = [m.content for m in ai_messages]
+        print(f'AI response : {ai_texts[0]}')
 
     except Exception:
         print("Error during query:")
